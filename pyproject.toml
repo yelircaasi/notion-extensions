@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "notion-extensions"
+version = "0.1.0"
+description = "Personalized tools to help me work with the Notion API and fill in its gaps."
+authors = ["Isaac Riley <isaac.r.riley@gmail.com>"]
+license = "GPLv3"
+readme = "README.md"
+packages = [{include = "notion_extensions"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+notion-client = "^2.0.0"
+selenium = "^4.8.2"
+
+[tool.poetry.group.dev.dependencies]
+ipython = "^8.11.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
