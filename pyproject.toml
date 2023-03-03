@@ -1,16 +1,18 @@
 [tool.poetry]
-name = "notion-extensions"
+name = "notion_extensions"
 version = "0.1.0"
-description = "Personalized tools to help me work with the Notion API and fill in its gaps."
+description = "Personalized tools to help me work with the Notion API and fill in its gaps, most notably wiith Selenium."
 authors = ["Isaac Riley <isaac.r.riley@gmail.com>"]
 license = "GPLv3"
 readme = "README.md"
-packages = [{include = "notion_extensions"}]
+#packages = [{include = "src/notion_extensions"}]
+#include = [{path = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
 notion-client = "^2.0.0"
 selenium = "^4.8.2"
+tomlkit = "^0.11.6"
 
 [tool.poetry.group.dev.dependencies]
 ipython = "^8.11.0"

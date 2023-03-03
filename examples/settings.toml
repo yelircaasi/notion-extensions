@@ -1,0 +1,8 @@
+[general] 
+browser = "chrome"
+
+[paths]
+token = "/home/isaac/.config/notion/tokens/taskwarrior"
+firefox_profile = "/home/isaac/.mozilla/firefox/uxoqb3lu.default-release"
+chrome_profile = "/home/isaac/.config/google-chrome"
+edge_profile = "/home/isaac/.config/microsoft-edge"

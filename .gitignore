@@ -1,5 +1,6 @@
-# secrets
-secrets.toml
+# tokens
+tokens.toml
+tokens/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
