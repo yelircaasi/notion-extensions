@@ -14,6 +14,7 @@ todays_date = date.today()
 
 
 def parse_key(key: str) -> tuple:
+    key = str(key)
     strings = key.split("_")
     if len(strings) == 3:
         day, hour, min = strings
@@ -25,6 +26,7 @@ def parse_key(key: str) -> tuple:
 
 
 def parse_time_str(key: str) -> Union[int, tuple]:
+    key = str(key)
     strings = key.split(":")
     # if len(strings) == 1:
     #     return int(strings[0])
@@ -74,8 +76,8 @@ def fix_day(week, day):
 
 
 def get_times_from_recipe_agenda(agenda: dotdict) -> list:
-    days: list = agenda.days
-    times: list = agenda.times
+    days: list = list(map(str, agenda.days))
+    times: list = list(map(str, agenda.times))
     if days:
         days = list(map(parse_key, days))
     else:

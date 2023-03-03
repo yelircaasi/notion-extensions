@@ -1,3 +1,4 @@
+from datetime import date
 import json 
 
 from notion_extensions.config import config, recipe
@@ -22,8 +23,8 @@ notion = get_client(config.integration_token)
 browser = get_browser(config)
 browser.get(recipe.page_url)
 
-click = get_click_function(browser, min_pause=1, max_pause=2)
-escape = get_escape_function(browser, min_pause=1, max_pause=2)
+click = get_click_function(browser, min_pause=0.7, max_pause=1.4)
+escape = get_escape_function(browser, min_pause=0.7, max_pause=1.2)
 get_xpath = get_get_xpath_function(recipe.xpaths.reminder_template)
 
 
@@ -155,15 +156,15 @@ def fix_manually_list(times):
         click(toggle_xpath)
 
 
-def main():
-    close_toggles()
-    times = get_times_from_recipe_agenda(recipe.agenda)
-    for week, day in days_from_times(times):
-        change_date_header(week, day)
-    for week, day, hour, minute in times:
-        change_date(week, day, hour, minute)
-    fix_manually_list(times)
-    browser.close()
+# def main():
+#     close_toggles()
+#     times = get_times_from_recipe_agenda(recipe.agenda)
+#     for week, day in days_from_times(times):
+#         change_date_header(week, day)
+#     for week, day, hour, minute in times:
+#         change_date(week, day, hour, minute)
+#     fix_manually_list(times)
+#     browser.close()
 
 
 def update_during_planning(): #TODO
@@ -173,6 +174,13 @@ def update_during_planning(): #TODO
     times = get_times_from_recipe_agenda(recipe.agenda)
     for week, day in days_from_times(times):
         change_date_header(week, day)
+        print(f"Changed header ({week}) {day}")
+    for week, day, hour, minute in times:
+        change_date(week, day, hour, minute)
+        print(f"Changed date ({week}) {day} {hour:02d}:{minute:02d}")
+    fix_manually_list(times)
+    browser.close()
+    
 
 
 def update_during_week(): #TODO
@@ -190,6 +198,13 @@ def update_during_week(): #TODO
     fix_manually_list(times)
     browser.close()
 
+
+def main():
+    if date.today().isoweekday() > 4:
+        update_during_planning()
+    else:
+        update_during_week()
+        
 
 if __name__ == "__main__":
     main()
