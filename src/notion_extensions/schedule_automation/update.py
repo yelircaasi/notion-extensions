@@ -1,8 +1,9 @@
+import json 
+
 from notion_extensions.config import config, recipe
 from notion_extensions.utils.date import (
     fix_date,
     fix_day,
-    is_weekend,
     parse_key,
     get_times_from_recipe_agenda,
     unparse,
@@ -30,7 +31,7 @@ def change_date_header(week, day):
     day_block_id = recipe.day_block_ids[unparse(week, day)]
     d = notion.blocks.retrieve(day_block_id)["toggle"]
     minipause()
-    text = fix_day(day)
+    text = fix_day(week, day)
     d["rich_text"][0]["text"]["content"] = text
     d["rich_text"][0]["plain_text"] = text
     notion.blocks.update(day_block_id, toggle=d)
@@ -42,11 +43,62 @@ def change_date(week, day, hour, minute):
     minipause()
     new_to_do = notion.blocks.retrieve(id)["to_do"]
     d = new_to_do["rich_text"][0]["mention"]["date"]["start"]
-    new_d = fix_date(d, day)
+    new_d = fix_date(d, week, day)
     new_to_do["rich_text"][0]["mention"]["date"]["start"] = new_d
     new_to_do["rich_text"][0]["plain_text"] = new_d
     minipause()
     u = notion.blocks.update(id, to_do=new_to_do)
+
+
+def change_date_move_content(day, hour, minute): #TODO
+    """Specifically for updating the weekend during the week."""
+    assert day > 4
+
+    id_week = recipe.time_block_ids[unparse(0, day, hour, minute)]
+    id_plan = recipe.time_block_ids[unparse(-1, day, hour, minute)]
+
+    d = notion.blocks.retrieve(id_week)["to_do"]
+
+    to_do_week = {}
+    to_do_week.update(json.loads(json.dumps(d)))
+    to_do_plan = {}
+    to_do_plan.update(json.loads(json.dumps(d)))
+
+    old_date = to_do_week["rich_text"][0]["mention"]["date"]["start"]
+    new_date_week = fix_date(old_date, 0, day)
+    new_date_plan = fix_date(old_date, -1, day)
+    # print("week", new_date_week)
+    # print("plan", new_date_plan)
+    # print("old", old_date)
+
+    week_text = to_do_week["rich_text"][1]["text"]["content"]
+
+    to_do_week["rich_text"][0]["mention"]["date"]["start"] = new_date_week
+    to_do_week["rich_text"][0]["plain_text"] = new_date_week
+    to_do_week["rich_text"][1]["text"]["content"] = " \n"
+    to_do_week["rich_text"][1]["plain_text"] = " \n"
+
+    to_do_plan["rich_text"][0]["mention"]["date"]["start"] = new_date_plan
+    to_do_plan["rich_text"][0]["plain_text"] = new_date_plan
+    to_do_plan["rich_text"][1]["text"]["content"] = week_text
+    to_do_plan["rich_text"][1]["plain_text"] = week_text
+    
+    assert to_do_week != to_do_plan
+    _ = notion.blocks.update(id_week, to_do=to_do_week)
+    # print("WEEK =====================================================================")
+    # print(json.dumps(to_do_week, indent=2))
+    # print("-------------------------------------------------------------------------------")
+    # print(json.dumps(_["to_do"], indent=2))
+    # print()
+    _ = notion.blocks.update(id_plan, to_do=to_do_plan)
+    # print("PLAN =====================================================================")
+    # print(json.dumps(to_do_plan, indent=2))
+    # print("-------------------------------------------------------------------------------")
+    # print(json.dumps(_["to_do"], indent=2))
+    
+
+    
+
 
 
 def close_toggles():
@@ -79,7 +131,7 @@ def fix_reminder_menu():
 
     escape()
     escape()
-    click(recipe.xpaths.background)
+    #click(recipe.xpaths.background)
 
 
 def fix_manually_single(week, day, hour, minute):
@@ -90,6 +142,7 @@ def fix_manually_single(week, day, hour, minute):
 
 def fix_manually_list(times):
     days = days_from_times(times)
+    #print(days)
     for week, day in days:
 
         toggle_xpath = recipe.xpaths.day_toggles[unparse(week, day)]
@@ -109,6 +162,31 @@ def main():
         change_date_header(week, day)
     for week, day, hour, minute in times:
         change_date(week, day, hour, minute)
+    fix_manually_list(times)
+    browser.close()
+
+
+def update_during_planning(): #TODO
+    if not recipe.agenda.days:
+        recipe.agenda.days = ["mon", "tue", "wed", "thu"]
+    close_toggles()
+    times = get_times_from_recipe_agenda(recipe.agenda)
+    for week, day in days_from_times(times):
+        change_date_header(week, day)
+
+
+def update_during_week(): #TODO
+    if not recipe.agenda.days:
+        recipe.agenda.days = ["fri0", "sat0", "sun0", "fri", "sat", "sun"]
+    print(list(recipe.agenda.days))
+    print(recipe.agenda.times)
+    close_toggles()
+    times = get_times_from_recipe_agenda(recipe.agenda)
+    for week, day in days_from_times(times):
+        change_date_header(week, day)
+    for week, day, hour, minute in times:
+        if not week and day > 4:
+            change_date_move_content(day, hour, minute)
     fix_manually_list(times)
     browser.close()
 
